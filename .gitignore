@@ -1,0 +1,28 @@
+# Diretórios comuns para ignorar
+node_modules/
+dist/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Editor de texto/IDE
+.vscode/
+.idea/
+*.swp
+
+# Configurações de ambiente
+.env
+.env.local
+.env.*.local
+
+# Arquivos temporários
+*.tmp
+*.temp
