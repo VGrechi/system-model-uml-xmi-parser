@@ -1,3 +1,5 @@
 interface Port extends Base {
-    aggregation: string;
+    classId: string;
+    componentName: string;
+    direction: "in" | "out" | "inout";
 }

@@ -10,7 +10,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aduh95/viz.js": "^3.7.0",
+    "cytoscape": "^3.30.4",
+    "graphlib": "^2.1.8",
     "typescript": "^5.7.3",
+    "viz.js": "^2.1.2",
     "xml2js": "^0.6.2"
   },
   "devDependencies": {
