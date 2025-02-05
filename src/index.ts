@@ -1,3 +1,4 @@
+import { writeToFile } from './utils/txt-utils';
 import { readXML } from './utils/xml-utils';
 import { SystemViewParser } from './service/system-view-parser';
 
@@ -10,46 +11,47 @@ import { SystemViewParser } from './service/system-view-parser';
 
     SystemViewParser.parse(result, portsMap, componentsMap, connectorsArray);
 
-    const printNode = (port: Port) => {
-        console.log(`[${port.componentName}] ${port.direction.toUpperCase()} ${port.name}`);
+    let paths: string[] = [];
+
+    const storePath = (path: string[]) => {
+        if(path.length <= 1) return;
+        paths.push(path.join(" - "));
     }
 
     const printEdge = (connector: Connector) => {
-        console.log(`- ${connector.name} -`);
+        return `- ${connector.name} -`;
     }
 
-    const printEndOfPath = () => {
-        console.log('- - - - - - - - -\n')
+    const printNode = (port: Port) => {
+        return `[${port.componentName}] ${port.direction.toUpperCase()} ${port.name}`
     }
 
-    const explorePort = (port: Port) => {
-        printNode(port);
-
-        //if(port.direction === "out" && !connectorsArray.find(connector => connector.source === port.id)) return;
-
+    const explorePort = (port: Port, currentPath: string[]) => {
+        currentPath.push(printNode(port));
+        
         if(port.direction === "in" && !connectorsArray.find(connector => connector.source === port.id)) {
             const currentComponent = componentsMap.get(port.classId);
 
             currentComponent.ports
                 .filter(p => p.direction !== "in")
-                .forEach(p => explorePort(p));
+                .forEach(p => explorePort(p, [...currentPath]));
+        } else {
+            exploreConnectors(port, [...currentPath]);
         }
-
-        exploreConnectors(port);
     }
 
-    const exploreConnectors = (port: Port) => {
+    const exploreConnectors = (port: Port, currentPath: string[]) => {
         const connectors = connectorsArray.filter(connector => connector.source === port.id);
 
         if(connectors.length === 0) {
-            printEndOfPath();
+            storePath(currentPath);
             return;
         }
 
         connectors.forEach(connector => {
-            printEdge(connector);
-            const port = portsMap.get(connector.target);
-            explorePort(port);
+            let newPath = [...currentPath, printEdge(connector)];
+            const nextPort = portsMap.get(connector.target);
+            if (nextPort) explorePort(nextPort, newPath);
         })
     }
 
@@ -58,37 +60,15 @@ import { SystemViewParser } from './service/system-view-parser';
         .filter(port => !connectorsArray.find(connector => connector.target === port.id));
 
     inPorts.forEach(inPort => {
-        printNode(inPort);
-        exploreConnectors(inPort);
+        explorePort(inPort, []);
     });
 
-    
-
-
-
-    
-
-    
-
-    
-
-
-    //console.log(portsMap);
+    writeToFile("out/output.txt", paths);
 
     /*
-     From FlowsAndPorts, identify in and out ports.
-     Starting with in ports:
-     - 
-     - Identify its owner (Class name)
-     - Identify target, other ownedAttribute inside Class, need to confirm if it is and out port.
+    Target: 24 paths
 
-     Print all connectors
-     - In Port Name (Class Name)
-     - Out Port Name (Class Name)
-
-     Challenge: 
-     - find all paths from frontEndData to longitudinal moviment
-     - exclude paths without vulnerabilities and faults
-     Result is a set of paths that form and AFT
+    Camera OUT connectig to all VC IN ports
     */
+    
 })()
