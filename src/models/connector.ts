@@ -1,6 +1,6 @@
 interface Connector extends Base {
-    source: string;
-    sourceComponent: string;
-    target: string;
-    targetComponent: string;
+    sourcePortId: string;
+    sourceComponentId: string;
+    targetPortId: string;
+    targetComponentId: string;
 }

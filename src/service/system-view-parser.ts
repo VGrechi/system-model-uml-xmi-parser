@@ -3,8 +3,8 @@ export class SystemViewParser {
     static buildBase(pe: any): Base {
         return {
             id: pe['$']['xmi:id'],
-            type: pe['$']['xmi:type'],
             name: pe['$'].name,
+            umlType: pe['$']['xmi:type'],
         };
     }
 
@@ -59,7 +59,7 @@ export class SystemViewParser {
                     .filter(oa => oa['$']['xmi:type'] === 'uml:Property')
                     .map(oa => {
                         let p: Property = <Property> this.buildBase(oa);
-                        p.classType = oa['$']['type'];
+                        p.classDefinitionId = oa['$']['type'];
                         return p;
                     });
 
@@ -67,8 +67,8 @@ export class SystemViewParser {
                     .filter(oa => oa['$']['xmi:type'] === 'uml:Port')
                     .map(oa => {
                         let p: Port = <Port> this.buildBase(oa);
-                        p.classId = c.id;
-                        p.componentType = c.name;
+                        p.ownerClassId = c.id;
+                        p.ownerClassName = c.name;
 
                         p.direction = flowsAndPorts.find(fp => fp.basePort === p.id)?.direction || "inout";
 
@@ -87,10 +87,10 @@ export class SystemViewParser {
                             ends.push(ce['$'])
                         });
 
-                        c.source = ends[0]['role'];
-                        c.sourceComponent = ends[0]['partWithPort'];
-                        c.target = ends[1]['role'];
-                        c.targetComponent = ends[1]['partWithPort'];
+                        c.sourcePortId = ends[0]['role'];
+                        c.sourceComponentId = ends[0]['partWithPort'];
+                        c.targetPortId = ends[1]['role'];
+                        c.targetComponentId = ends[1]['partWithPort'];
 
                         connectorsArray.push(c);
                         return c;
@@ -105,36 +105,30 @@ export class SystemViewParser {
         // for each entry in classesMap, create a component and set into componentsMap.
         // If the component has a property, and the property type is a class, then mark component as master.
         classesMap.forEach((c, classId) => {
-            let c1: Component = {
-                ...c,
-                id: classId,
-                classType: classId,
-                name: c.name,
-                isComposite: false
-            };
 
             if(c.properties.length > 0){
-                c1.isComposite = true;
+                let c1: Component = {
+                    ...c,
+                    id: classId,
+                    classDefinitionId: classId,
+                    name: c.name,
+                    isComposite: true
+                };
 
                 c.properties.forEach(p => {
-                    const clazz: Class = classesMap.get(p.classType);
+                    const clazz: Class = classesMap.get(p.classDefinitionId);
                     let c2: Component = {
                         ...clazz,
                         id: p.id,
-                        classType: p.classType,
+                        classDefinitionId: p.classDefinitionId,
                         name: p.name,
                         isComposite: false
                     };
                     componentsMap.set(c2.id, c2);
                 });
+                componentsMap.set(c1.id, c1);
             }
-                
-            componentsMap.set(c1.id, c1);
-
         });
-
-       
-
     }
 
     static sanitizeComponents(componentsMap: Map<string, Component>, connectorsArray: Array<Connector>){
@@ -142,7 +136,7 @@ export class SystemViewParser {
         const keysToDelete: string[] = [];
 
         componentsMap.forEach(component => {
-            if (!connectorsArray.find(connector => connector.sourceComponent === component.id || connector.targetComponent === component.id)
+            if (!connectorsArray.find(c => [c.sourceComponentId, c.targetComponentId].includes(component.id))
                 && !component.isComposite) {
                 keysToDelete.push(component.id);
             }

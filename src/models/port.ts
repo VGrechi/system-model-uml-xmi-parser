@@ -1,5 +1,7 @@
 interface Port extends Base {
-    classId: string;
-    componentType: string;
+    ownerClassId: string;
+    ownerClassName: string;
+    ownerComponentId: string;
+    ownerComponentName: string;
     direction: "in" | "out" | "inout";
 }

@@ -23,13 +23,13 @@ import { SystemViewParser } from './service/system-view-parser';
     }
 
     const printNode = (port: Port) => {
-        return `[${port.componentType}] ${port.direction.toUpperCase()} ${port.name} ${port.id}`
+        return `[${port.ownerComponentName}] ${port.direction.toUpperCase()} ${port.name} ${port.id}`
     }
 
     const findComponent = (port: Port) => {
         let component;
         componentsMap.forEach(c => {
-            if(c.classType === port.classId) {
+            if(c.classDefinitionId === port.ownerClassId) {
                 component = c;
             }
         });
@@ -39,7 +39,7 @@ import { SystemViewParser } from './service/system-view-parser';
     const explorePort = (port: Port, currentPath: string[]) => {
         currentPath.push(printNode(port));
         
-        if(port.direction === "in" && !connectorsArray.find(connector => connector.source === port.id)) {
+        if(port.direction === "in" && !connectorsArray.find(connector => connector.sourcePortId === port.id)) {
             const currentComponent: Component = findComponent(port);
 
             if(!currentComponent) {
@@ -59,7 +59,7 @@ import { SystemViewParser } from './service/system-view-parser';
     }
 
     const exploreConnectors = (port: Port, currentPath: string[]) => {
-        const connectors = connectorsArray.filter(connector => connector.source === port.id);
+        const connectors = connectorsArray.filter(connector => connector.sourcePortId === port.id);
 
         if(connectors.length === 0) {
             storePath(currentPath);
@@ -68,14 +68,14 @@ import { SystemViewParser } from './service/system-view-parser';
 
         connectors.forEach(connector => {
             let newPath = [...currentPath, printEdge(connector)];
-            const nextPort = portsMap.get(connector.target);
+            const nextPort = portsMap.get(connector.targetPortId);
             if (nextPort) explorePort(nextPort, newPath);
         })
     }
 
     const inPorts = Array.from(portsMap.values())
         .filter(port => port.direction === "in")
-        .filter(port => !connectorsArray.find(connector => connector.target === port.id));
+        .filter(port => !connectorsArray.find(connector => connector.targetPortId === port.id));
 
     inPorts.forEach(inPort => {
         explorePort(inPort, []);
