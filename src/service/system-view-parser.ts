@@ -1,6 +1,6 @@
 export class SystemViewParser {
 
-    static buildBase(pe: any): Base{
+    static buildBase(pe: any): Base {
         return {
             id: pe['$']['xmi:id'],
             type: pe['$']['xmi:type'],
@@ -8,78 +8,26 @@ export class SystemViewParser {
         };
     }
 
-    static parse(xml: any, portsMap: Map<string, Port>, componentsMap: Map<string, Class>, connectorsArray: Array<Connector>): SystemView {
+    static parse(xml: any): SystemView {
+
+        let portsMap = new Map<string, Port>();
+        let componentsMap = new Map<string, Component>();
+        let connectorsArray = new Array<Connector>();
 
         const xmi = xml['xmi:XMI'];
 
         const flowsAndPorts = this.parseFlowsAndPorts(xmi);
 
-        const modelSystemView = this.parseModelSystemView(xmi, flowsAndPorts, portsMap, componentsMap, connectorsArray);
+        this.parseModelSystemView(xmi, flowsAndPorts, portsMap, componentsMap, connectorsArray);
+
+        this.sanitizeComponents(componentsMap, connectorsArray);
 
         return {
-            ...modelSystemView,
-            flowsAndPorts
+            portsMap,
+            componentsMap,
+            connectorsArray
         }        
         
-    }
-
-    static parseModelSystemView(xmi, flowsAndPorts: FlowPort[], portsMap: Map<string, Port>, componentsMap: Map<string, Class>, connectorsArray: Array<Connector>){
-        const modelSystemView = xmi['uml:Model'][0].packagedElement.filter(pe => pe['$'].name === 'modelSystemView')[0];
-
-        const associations: Association[] = modelSystemView.packagedElement
-            .filter(pe => pe['$']['xmi:type'] === 'uml:Association')
-            .map(pe => {
-                const a: Base = this.buildBase(pe);
-                a['memberEnd'] = pe['$']['memberEnd'].split(' ');
-                return a;
-            });
-
-        const classes: Class[] = modelSystemView.packagedElement
-            .filter(pe => pe['$']['xmi:type'] === 'uml:Class')
-            .map(pe => {
-                const c: Class = <Class> this.buildBase(pe);
-
-                c.ports = pe.ownedAttribute
-                    .filter(oa => oa['$']['xmi:type'] === 'uml:Port')
-                    .map(oa => {
-                        const p: Base = this.buildBase(oa);
-                        p['classId'] = c.id;
-                        p['componentName'] = c.name;
-
-                        p['direction'] = flowsAndPorts.find(fp => fp.basePort === p.id)?.direction || "inout";
-
-                        portsMap.set(p.id, <Port> p);
-                        return p;
-                    });
-
-                c.connectors = pe.ownedConnector?.
-                    filter(oc => oc['$']['xmi:type'] === 'uml:Connector')
-                    .map(oc => {
-                        const c: Base = this.buildBase(oc);
-
-                        const ends = [];
-                        oc.end?.filter(ce => ce['$']['xmi:type'] === 'uml:ConnectorEnd')
-                        .map(ce => {
-                            ends.push(ce['$'])
-                        });
-
-
-                        c['source'] = ends[0]['role'];
-                        c['target'] = ends[1]['role'];
-                        
-
-                        connectorsArray.push(<Connector> c);
-                        return c;
-                    });
-                    
-                componentsMap.set(c.id, <Class> c);
-                return c;
-            });
-
-        return {
-            classes,
-            associations
-        }
     }
 
     static parseFlowsAndPorts(xmi){
@@ -93,4 +41,116 @@ export class SystemViewParser {
 
         return flowPorts;
     }
+
+    static parseModelSystemView(xmi, 
+        flowsAndPorts: FlowPort[], 
+        portsMap: Map<string, Port>,  
+        componentsMap: Map<string, Component>,
+        connectorsArray: Array<Connector>){
+
+        const modelSystemView = xmi['uml:Model'][0].packagedElement.filter(pe => pe['$'].name === 'modelSystemView')[0];
+
+        const classesMap: Map<string, Class> = modelSystemView.packagedElement
+            .filter(pe => pe['$']['xmi:type'] === 'uml:Class')
+            .map(pe => {
+                let c: Class = <Class> this.buildBase(pe);
+
+                c.properties = pe.ownedAttribute
+                    .filter(oa => oa['$']['xmi:type'] === 'uml:Property')
+                    .map(oa => {
+                        let p: Property = <Property> this.buildBase(oa);
+                        p.classType = oa['$']['type'];
+                        return p;
+                    });
+
+                c.ports = pe.ownedAttribute
+                    .filter(oa => oa['$']['xmi:type'] === 'uml:Port')
+                    .map(oa => {
+                        let p: Port = <Port> this.buildBase(oa);
+                        p.classId = c.id;
+                        p.componentType = c.name;
+
+                        p.direction = flowsAndPorts.find(fp => fp.basePort === p.id)?.direction || "inout";
+
+                        portsMap.set(p.id, p);
+                        return p;
+                    });
+
+                c.connectors = pe.ownedConnector?.
+                    filter(oc => oc['$']['xmi:type'] === 'uml:Connector')
+                    .map(oc => {
+                        const c: Connector = <Connector> this.buildBase(oc);
+
+                        const ends = [];
+                        oc.end?.filter(ce => ce['$']['xmi:type'] === 'uml:ConnectorEnd')
+                        .map(ce => {
+                            ends.push(ce['$'])
+                        });
+
+                        c.source = ends[0]['role'];
+                        c.sourceComponent = ends[0]['partWithPort'];
+                        c.target = ends[1]['role'];
+                        c.targetComponent = ends[1]['partWithPort'];
+
+                        connectorsArray.push(c);
+                        return c;
+                    });
+
+                return c;
+            }).reduce((acc, c) => {
+                acc.set(c.id, c);
+                return acc;
+            }, new Map<string, Class>());
+
+        // for each entry in classesMap, create a component and set into componentsMap.
+        // If the component has a property, and the property type is a class, then mark component as master.
+        classesMap.forEach((c, classId) => {
+            let c1: Component = {
+                ...c,
+                id: classId,
+                classType: classId,
+                name: c.name,
+                isComposite: false
+            };
+
+            if(c.properties.length > 0){
+                c1.isComposite = true;
+
+                c.properties.forEach(p => {
+                    const clazz: Class = classesMap.get(p.classType);
+                    let c2: Component = {
+                        ...clazz,
+                        id: p.id,
+                        classType: p.classType,
+                        name: p.name,
+                        isComposite: false
+                    };
+                    componentsMap.set(c2.id, c2);
+                });
+            }
+                
+            componentsMap.set(c1.id, c1);
+
+        });
+
+       
+
+    }
+
+    static sanitizeComponents(componentsMap: Map<string, Component>, connectorsArray: Array<Connector>){
+        // Remove components without connectors
+        const keysToDelete: string[] = [];
+
+        componentsMap.forEach(component => {
+            if (!connectorsArray.find(connector => connector.sourceComponent === component.id || connector.targetComponent === component.id)
+                && !component.isComposite) {
+                keysToDelete.push(component.id);
+            }
+        });
+    
+        // Delete components after iteration
+        keysToDelete.forEach(key => componentsMap.delete(key));
+    }
+
+    
 }

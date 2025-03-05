@@ -4,12 +4,12 @@ import { SystemViewParser } from './service/system-view-parser';
 
 (async () => {
     const result = await readXML('assets/Automotive HAD Vehicle.uml');
-    
-    let portsMap = new Map<string, Port>();
-    let componentsMap = new Map<string, Class>();
-    let connectorsArray = new Array<Connector>();
 
-    SystemViewParser.parse(result, portsMap, componentsMap, connectorsArray);
+    const { portsMap, componentsMap, connectorsArray } = SystemViewParser.parse(result);
+
+    componentsMap.forEach(component => {
+        console.log(`Component: ${component.id} ${component.name}`);
+    });
 
     let paths: string[] = [];
 
@@ -19,18 +19,36 @@ import { SystemViewParser } from './service/system-view-parser';
     }
 
     const printEdge = (connector: Connector) => {
-        return `- ${connector.name} -`;
+        return `- ${connector.id} -`;
     }
 
     const printNode = (port: Port) => {
-        return `[${port.componentName}] ${port.direction.toUpperCase()} ${port.name}`
+        return `[${port.componentType}] ${port.direction.toUpperCase()} ${port.name} ${port.id}`
+    }
+
+    const findComponent = (port: Port) => {
+        let component;
+        componentsMap.forEach(c => {
+            if(c.classType === port.classId) {
+                component = c;
+            }
+        });
+        return component;
     }
 
     const explorePort = (port: Port, currentPath: string[]) => {
         currentPath.push(printNode(port));
         
         if(port.direction === "in" && !connectorsArray.find(connector => connector.source === port.id)) {
-            const currentComponent = componentsMap.get(port.classId);
+            const currentComponent: Component = findComponent(port);
+
+            if(!currentComponent) {
+                return;
+            }
+
+            if(currentComponent.isComposite) {
+                exploreConnectors(port, [...currentPath]);
+            }
 
             currentComponent.ports
                 .filter(p => p.direction !== "in")
@@ -68,7 +86,10 @@ import { SystemViewParser } from './service/system-view-parser';
     /*
     Target: 24 paths
 
-    Camera OUT connectig to all VC IN ports
+    TODO: Two ports without direction
+
+    Camera OUT connectig to all VC IN ports - Check XML
+    Remove frontier connections on System level
     */
     
 })()

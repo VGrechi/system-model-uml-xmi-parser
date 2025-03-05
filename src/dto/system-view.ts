@@ -1,5 +1,5 @@
 interface SystemView {
-    classes: Class[];
-    associations: Association[];
-    flowsAndPorts: FlowPort[];
+    portsMap: Map<string, Port>;
+    componentsMap: Map<string, Component>;
+    connectorsArray: Array<Connector>;
 }
