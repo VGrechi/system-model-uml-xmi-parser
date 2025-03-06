@@ -27,19 +27,26 @@ import { SystemViewParser } from './service/system-view-parser';
     }
 
     const findComponent = (port: Port) => {
-        let component;
-        componentsMap.forEach(c => {
-            if(c.classDefinitionId === port.ownerClassId) {
-                component = c;
-            }
-        });
-        return component;
+        return componentsMap.get(port.ownerComponentId);
+    }
+
+    const findPort = (portId: string, componentId: string) => {
+        if(!componentId){
+            componentsMap.forEach(component => {
+                if(component.isComposite) {
+                    componentId = component.id;
+                }
+            });
+
+        }
+        return portsMap.get(`${portId}:${componentId}`);
     }
 
     const explorePort = (port: Port, currentPath: string[]) => {
         currentPath.push(printNode(port));
         
-        if(port.direction === "in" && !connectorsArray.find(connector => connector.sourcePortId === port.id)) {
+        if(port.direction === "in" 
+            && !connectorsArray.find(connector => connector.sourcePortId === port.id)) {
             const currentComponent: Component = findComponent(port);
 
             if(!currentComponent) {
@@ -59,7 +66,11 @@ import { SystemViewParser } from './service/system-view-parser';
     }
 
     const exploreConnectors = (port: Port, currentPath: string[]) => {
-        const connectors = connectorsArray.filter(connector => connector.sourcePortId === port.id);
+        const sourceComponent = componentsMap.get(port.ownerComponentId);
+
+        const connectors = connectorsArray.filter(c => c.sourcePortId === port.id
+            && (sourceComponent.isComposite || c.sourceComponentId === port.ownerComponentId)
+        );
 
         if(connectors.length === 0) {
             storePath(currentPath);
@@ -68,7 +79,7 @@ import { SystemViewParser } from './service/system-view-parser';
 
         connectors.forEach(connector => {
             let newPath = [...currentPath, printEdge(connector)];
-            const nextPort = portsMap.get(connector.targetPortId);
+            const nextPort = findPort(connector.targetPortId, connector.targetComponentId);
             if (nextPort) explorePort(nextPort, newPath);
         })
     }
@@ -82,14 +93,5 @@ import { SystemViewParser } from './service/system-view-parser';
     });
 
     writeToFile("out/output.txt", paths);
-
-    /*
-    Target: 24 paths
-
-    TODO: Two ports without direction
-
-    Camera OUT connectig to all VC IN ports - Check XML
-    Remove frontier connections on System level
-    */
     
 })()

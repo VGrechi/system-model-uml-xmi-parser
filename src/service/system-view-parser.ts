@@ -22,6 +22,8 @@ export class SystemViewParser {
 
         this.sanitizeComponents(componentsMap, connectorsArray);
 
+        this.sanitizePorts(portsMap, connectorsArray);
+
         return {
             portsMap,
             componentsMap,
@@ -71,8 +73,6 @@ export class SystemViewParser {
                         p.ownerClassName = c.name;
 
                         p.direction = flowsAndPorts.find(fp => fp.basePort === p.id)?.direction || "inout";
-
-                        portsMap.set(p.id, p);
                         return p;
                     });
 
@@ -102,8 +102,6 @@ export class SystemViewParser {
                 return acc;
             }, new Map<string, Class>());
 
-        // for each entry in classesMap, create a component and set into componentsMap.
-        // If the component has a property, and the property type is a class, then mark component as master.
         classesMap.forEach((c, classId) => {
 
             if(c.properties.length > 0){
@@ -112,7 +110,12 @@ export class SystemViewParser {
                     id: classId,
                     classDefinitionId: classId,
                     name: c.name,
-                    isComposite: true
+                    isComposite: true,
+                    ports: c.ports.map(port => ({
+                        ...port,
+                        ownerComponentId: classId,
+                        ownerComponentName: c.name
+                    }))
                 };
 
                 c.properties.forEach(p => {
@@ -122,12 +125,24 @@ export class SystemViewParser {
                         id: p.id,
                         classDefinitionId: p.classDefinitionId,
                         name: p.name,
-                        isComposite: false
+                        isComposite: false,
+                        ports: clazz.ports.map(port => ({
+                            ...port,
+                            ownerComponentId: p.id,
+                            ownerComponentName: p.name
+                        }))
                     };
                     componentsMap.set(c2.id, c2);
                 });
                 componentsMap.set(c1.id, c1);
             }
+
+        });
+
+        componentsMap.forEach(c => {
+            c.ports.forEach(port => {
+                portsMap.set(`${port.id}:${c.id}`, port);
+            });
         });
     }
 
@@ -144,6 +159,20 @@ export class SystemViewParser {
     
         // Delete components after iteration
         keysToDelete.forEach(key => componentsMap.delete(key));
+    }
+
+    static sanitizePorts(portsMap: Map<string, Port>, connectorsArray: Array<Connector>){
+        // Remove components without connectors
+        const keysToDelete: string[] = [];
+
+        portsMap.forEach(port => {
+            if (!connectorsArray.find(c => [c.sourcePortId, c.targetPortId].includes(port.id))) {
+                keysToDelete.push(`${port.id}:${port.ownerComponentId}`);
+            }
+        });
+    
+        // Delete components after iteration
+        keysToDelete.forEach(key => portsMap.delete(key));
     }
 
     
