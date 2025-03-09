@@ -18,7 +18,9 @@ export class SystemViewParser {
 
         const flowsAndPorts = this.parseFlowsAndPorts(xmi);
 
-        this.parseModelSystemView(xmi, flowsAndPorts, portsMap, componentsMap, connectorsArray);
+        const errorStates = this.parseErrorStates(xmi);
+
+        this.parseModelSystemView(xmi, flowsAndPorts, errorStates, portsMap, componentsMap, connectorsArray);
 
         this.sanitizeComponents(componentsMap, connectorsArray);
 
@@ -44,8 +46,21 @@ export class SystemViewParser {
         return flowPorts;
     }
 
+    static parseErrorStates(xmi){
+        const errorStates: ErrorState[] = xmi['ThreatsPropagation:ErrorState'].map(es => {
+            return {
+                id: es['$']['xmi:id'],
+                baseStateId: es['$']['base_State'],
+                probability: es['$']['probability']
+            }
+        });
+
+        return errorStates;
+    }
+
     static parseModelSystemView(xmi, 
         flowsAndPorts: FlowPort[], 
+        errorStates: ErrorState[],
         portsMap: Map<string, Port>,  
         componentsMap: Map<string, Component>,
         connectorsArray: Array<Connector>){
@@ -96,6 +111,30 @@ export class SystemViewParser {
                         return c;
                     });
 
+                c.behaviors = pe.ownedBehavior?.
+                    filter(ob => ob['$']['xmi:type'] === 'uml:StateMachine')
+                    .map(ob => {
+                        const b: Behavior = <Behavior> this.buildBase(ob);
+                        b.states = [];
+                        b.transitions = [];
+
+                        ob.region?.forEach(r => {
+                            r.subvertex?.
+                                filter(sv => sv['$']['xmi:type'] === 'uml:State')
+                                .map(sv => {
+                                    const s: State = <State> this.buildBase(sv);
+                                    b.states.push(s);
+                                });
+
+                            r.transition?.
+                                filter(sv => sv['$']['xmi:type'] === 'uml:Transition')
+                                .map(sv => {
+                                    const s: Transition = <Transition> this.buildBase(sv);
+                                    b.transitions.push(s);
+                                });
+                        });
+                        return b;
+                    });
                 return c;
             }).reduce((acc, c) => {
                 acc.set(c.id, c);
@@ -105,6 +144,7 @@ export class SystemViewParser {
         classesMap.forEach((c, classId) => {
 
             if(c.properties.length > 0){
+                
                 let c1: Component = {
                     ...c,
                     id: classId,
@@ -115,7 +155,8 @@ export class SystemViewParser {
                         ...port,
                         ownerComponentId: classId,
                         ownerComponentName: c.name
-                    }))
+                    })),
+                    errorStates: this.findErrorStates(errorStates, c)
                 };
 
                 c.properties.forEach(p => {
@@ -130,7 +171,8 @@ export class SystemViewParser {
                             ...port,
                             ownerComponentId: p.id,
                             ownerComponentName: p.name
-                        }))
+                        })),
+                        errorStates: this.findErrorStates(errorStates, clazz)
                     };
                     componentsMap.set(c2.id, c2);
                 });
@@ -144,6 +186,20 @@ export class SystemViewParser {
                 portsMap.set(`${port.id}:${c.id}`, port);
             });
         });
+    }
+
+    static findErrorStates(errorStates: ErrorState[], c: Class){
+        // see if any c.behavior.states has its id in errorStates.baseStateId
+        const errorStatesIds = errorStates.map(es => es.baseStateId);
+        const states = c.behaviors?.map(b => b.states).flat();
+        return states?.filter(s => errorStatesIds.includes(s.id))
+            .map(s => {
+                return {
+                    ...s,
+                    baseStateId: s.id,
+                    probability: errorStates.find(es => es.baseStateId === s.id)?.probability
+                }
+            });
     }
 
     static sanitizeComponents(componentsMap: Map<string, Component>, connectorsArray: Array<Connector>){

@@ -1,0 +1,2 @@
+interface Transition extends Base {
+}

@@ -11,6 +11,8 @@ import { AFTPrinter } from './service/aft-printer';
     const paths = PropagationPathIdentifier.identifyPropagationPath(systemView);
 
     //TODO - Find desired paths for analysis
+    // See if components.errorStates.length > 0
+    // If all components of a path lack errorStates, drop them
 
     //TODO - Build Attack-Fault Tree
 
