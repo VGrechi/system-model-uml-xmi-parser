@@ -1,4 +1,4 @@
-class ListNode<T> {
+export class ListNode<T> {
     value: T;
     next: ListNode<T> | null = null;
   
@@ -8,9 +8,9 @@ class ListNode<T> {
 }
   
 export class LinkedList<T> {
-    private head: ListNode<T> | null = null;
-    private tail: ListNode<T> | null = null;
-    private size: number = 0;
+    head: ListNode<T> | null = null;
+    tail: ListNode<T> | null = null;
+    size: number = 0;
   
     // Adiciona um elemento no final da lista
     append(value: T): void {

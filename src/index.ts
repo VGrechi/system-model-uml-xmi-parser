@@ -2,6 +2,7 @@ import { readXML } from './utils/xml-utils';
 import { SystemViewParser } from './service/system-view-parser';
 import { PropagationPathIdentifier } from './service/propagation-path-identifier';
 import { AFTPrinter } from './service/aft-printer';
+import { ErrorPathIdentifier } from './service/error-path-identifier';
 
 (async () => {
     const result = await readXML('assets/Automotive HAD Vehicle.uml');
@@ -10,10 +11,8 @@ import { AFTPrinter } from './service/aft-printer';
 
     const paths = PropagationPathIdentifier.identifyPropagationPath(systemView);
 
-    //TODO - Find desired paths for analysis
-    // See if components.errorStates.length > 0
-    // If all components of a path lack errorStates, drop them
-
+    const errorsPaths = ErrorPathIdentifier.identifyErrorPaths(systemView, paths);
+    
     //TODO - Build Attack-Fault Tree
 
     // AFT Example
