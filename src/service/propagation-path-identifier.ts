@@ -1,5 +1,4 @@
 import { LinkedList } from '../utils/linked-list';
-import { writeToFile } from '../utils/txt-utils';
 import { Path } from '../domain/propagation/path';
 
 export class PropagationPathIdentifier {
@@ -21,8 +20,6 @@ export class PropagationPathIdentifier {
         inPorts.forEach(inPort => {
             this.explorePort(inPort, new LinkedList<Path>());
         });
-
-        writeToFile("out/output.txt", this.paths.map(path => path.toString()));
 
         return this.paths;
     }

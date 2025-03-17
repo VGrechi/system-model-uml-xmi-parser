@@ -28,16 +28,6 @@
       <packagedElement xmi:type="uml:Class" xmi:id="_oWEZAO9jEe6K1ccSakqCcQ" name="Brakes">
         <ownedAttribute xmi:type="uml:Port" xmi:id="_xIvvkO9jEe6K1ccSakqCcQ" name="brakingForce" visibility="package" aggregation="composite"/>
         <ownedAttribute xmi:type="uml:Port" xmi:id="_uQfwEO9jEe6K1ccSakqCcQ" name="longitudinalMoviment" aggregation="composite"/>
-        <ownedBehavior xmi:type="uml:StateMachine" xmi:id="_1gRpIDFREe-kXZ6MxZ3qww" name="Brakes State Machine">
-          <region xmi:type="uml:Region" xmi:id="_-ZKVYDFREe-kXZ6MxZ3qww" name="Region1">
-            <transition xmi:type="uml:Transition" xmi:id="_LRDN0DFSEe-kXZ6MxZ3qww" source="_DF0RwDFSEe-kXZ6MxZ3qww" target="_GeYwEDFSEe-kXZ6MxZ3qww"/>
-            <transition xmi:type="uml:Transition" xmi:id="_lIdQsDFSEe-kXZ6MxZ3qww" source="_GeYwEDFSEe-kXZ6MxZ3qww" target="_XOCkQDFSEe-kXZ6MxZ3qww"/>
-            <transition xmi:type="uml:Transition" xmi:id="_lx5PQDFSEe-kXZ6MxZ3qww" source="_GeYwEDFSEe-kXZ6MxZ3qww" target="_DF0RwDFSEe-kXZ6MxZ3qww"/>
-            <subvertex xmi:type="uml:Pseudostate" xmi:id="_DF0RwDFSEe-kXZ6MxZ3qww" name="Healthy"/>
-            <subvertex xmi:type="uml:Pseudostate" xmi:id="_GeYwEDFSEe-kXZ6MxZ3qww" name="brakingForce comission?" kind="choice"/>
-            <subvertex xmi:type="uml:State" xmi:id="_XOCkQDFSEe-kXZ6MxZ3qww" name="Longitudinal Moviment Value Coarse"/>
-          </region>
-        </ownedBehavior>
       </packagedElement>
       <packagedElement xmi:type="uml:Class" xmi:id="_58tfkO9jEe6K1ccSakqCcQ" name="USB Stick">
         <ownedAttribute xmi:type="uml:Port" xmi:id="_5l4-YO-MEe6K1ccSakqCcQ" name="usbData" aggregation="composite"/>
@@ -65,21 +55,6 @@
       <packagedElement xmi:type="uml:Class" xmi:id="_hjXgsO9kEe6K1ccSakqCcQ" name="LiDAR" classifierBehavior="_i4dpICXPEe-pVPHyhHsgkw">
         <ownedAttribute xmi:type="uml:Port" xmi:id="_jBZk8O9kEe6K1ccSakqCcQ" name="sensorData" aggregation="composite"/>
         <ownedAttribute xmi:type="uml:Port" xmi:id="_kYsIAO9kEe6K1ccSakqCcQ" name="lidarEnvData" aggregation="composite"/>
-        <ownedBehavior xmi:type="uml:StateMachine" xmi:id="_i4dpICXPEe-pVPHyhHsgkw" name="LiDAR State Machine">
-          <region xmi:type="uml:Region" xmi:id="_kMLTwCXPEe-pVPHyhHsgkw" name="Region1">
-            <transition xmi:type="uml:Transition" xmi:id="_sNjJMCXPEe-pVPHyhHsgkw" name="corruptedData" isLeaf="true" source="_mSEpQCXPEe-pVPHyhHsgkw" target="_onOvUC0NEe-ejdw19gCgRw">
-              <trigger xmi:type="uml:Trigger" xmi:id="_0dwPYCXQEe-pVPHyhHsgkw" name="Attack" port="_jBZk8O9kEe6K1ccSakqCcQ"/>
-            </transition>
-            <transition xmi:type="uml:Transition" xmi:id="_r03I8C0NEe-ejdw19gCgRw" source="_onOvUC0NEe-ejdw19gCgRw" target="_nndu4CXPEe-pVPHyhHsgkw"/>
-            <transition xmi:type="uml:Transition" xmi:id="_1N8_QC0NEe-ejdw19gCgRw" source="_onOvUC0NEe-ejdw19gCgRw" target="_xHpRMC0NEe-ejdw19gCgRw"/>
-            <transition xmi:type="uml:Transition" xmi:id="_2UFrcC0OEe-ejdw19gCgRw" source="_nndu4CXPEe-pVPHyhHsgkw" target="_nndu4CXPEe-pVPHyhHsgkw"/>
-            <transition xmi:type="uml:Transition" xmi:id="_KVtmsC0PEe-ejdw19gCgRw" source="_xHpRMC0NEe-ejdw19gCgRw" target="_xHpRMC0NEe-ejdw19gCgRw"/>
-            <subvertex xmi:type="uml:Pseudostate" xmi:id="_mSEpQCXPEe-pVPHyhHsgkw" name="Healthy"/>
-            <subvertex xmi:type="uml:State" xmi:id="_nndu4CXPEe-pVPHyhHsgkw" name="LateDetection"/>
-            <subvertex xmi:type="uml:Pseudostate" xmi:id="_onOvUC0NEe-ejdw19gCgRw" name="Choice1" kind="choice"/>
-            <subvertex xmi:type="uml:State" xmi:id="_xHpRMC0NEe-ejdw19gCgRw" name="Undetected"/>
-          </region>
-        </ownedBehavior>
       </packagedElement>
       <packagedElement xmi:type="uml:Class" xmi:id="_p90kgO9kEe6K1ccSakqCcQ" name="Camera" classifierBehavior="_8oD2AN9qEe-7ge8I-wdyKA">
         <ownedAttribute xmi:type="uml:Port" xmi:id="_sp6-YO9kEe6K1ccSakqCcQ" name="lensSensor" aggregation="composite"/>

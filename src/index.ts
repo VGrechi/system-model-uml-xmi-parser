@@ -3,6 +3,7 @@ import { SystemViewParser } from './service/system-view-parser';
 import { PropagationPathIdentifier } from './service/propagation-path-identifier';
 import { AFTPrinter } from './service/aft-printer';
 import { ErrorPathIdentifier } from './service/error-path-identifier';
+import { writeToFile } from './utils/txt-utils';
 
 (async () => {
     const result = await readXML('assets/Automotive HAD Vehicle.uml');
@@ -12,6 +13,8 @@ import { ErrorPathIdentifier } from './service/error-path-identifier';
     const paths = PropagationPathIdentifier.identifyPropagationPath(systemView);
 
     const errorsPaths = ErrorPathIdentifier.identifyErrorPaths(systemView, paths);
+
+    writeToFile("out/output.txt", errorsPaths.map(path => path.toString()));
     
     //TODO - Build Attack-Fault Tree
 

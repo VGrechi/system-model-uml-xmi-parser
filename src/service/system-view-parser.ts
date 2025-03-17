@@ -9,18 +9,25 @@ export class SystemViewParser {
     }
 
     static parse(xml: any): SystemView {
-
-        let portsMap = new Map<string, Port>();
-        let componentsMap = new Map<string, Component>();
-        let connectorsArray = new Array<Connector>();
-
         const xmi = xml['xmi:XMI'];
 
         const flowsAndPorts = this.parseFlowsAndPorts(xmi);
 
+        const internalFaults = this.parseInternalFault(xmi);
+
+        const attacks = this.parseAttacks(xmi);
+
         const errorStates = this.parseErrorStates(xmi);
 
-        this.parseModelSystemView(xmi, flowsAndPorts, errorStates, portsMap, componentsMap, connectorsArray);
+        const classesMap = this.parseClasses(xmi, flowsAndPorts);
+
+        let componentsMap = this.identifyComponents(classesMap);
+
+        this.identifyThreatsPropagation(classesMap, componentsMap, internalFaults, attacks, errorStates);
+
+        let portsMap = this.identifyPorts(componentsMap);
+
+        let connectorsArray = this.identifyConnectors(classesMap);
 
         this.sanitizeComponents(componentsMap, connectorsArray);
 
@@ -33,7 +40,7 @@ export class SystemViewParser {
         }        
         
     }
-
+    
     static parseFlowsAndPorts(xmi){
         const flowPorts: FlowPort[] = xmi['PortAndFlows:FlowPort'].map(fp => {
             return {
@@ -44,6 +51,31 @@ export class SystemViewParser {
         });
 
         return flowPorts;
+    }
+
+    static parseInternalFault(xmi){
+        const internalFaults: InternalFault[] = xmi['ThreatsPropagation:InternalFault'].map(itf => {
+            return {
+                id: itf['$']['xmi:id'],
+                baseTransitionId: itf['$']['base_Transition']
+            }
+        });
+
+        return internalFaults;
+    }
+
+    static parseAttacks(xmi){
+        const attacks: Attack[] = xmi['ThreatsPropagation:Attack'].map(at => {
+            return {
+                id: at['$']['xmi:id'],
+                baseTransitionId: at['$']['base_Transition'],
+                kind: at['$']['kind'],
+                severity: at['$']['severity'],
+                threat: at['$']['threat']
+            }
+        });
+
+        return attacks;
     }
 
     static parseErrorStates(xmi){
@@ -58,16 +90,11 @@ export class SystemViewParser {
         return errorStates;
     }
 
-    static parseModelSystemView(xmi, 
-        flowsAndPorts: FlowPort[], 
-        errorStates: ErrorState[],
-        portsMap: Map<string, Port>,  
-        componentsMap: Map<string, Component>,
-        connectorsArray: Array<Connector>){
+    static parseClasses(xmi, flowsAndPorts: FlowPort[]){
 
         const modelSystemView = xmi['uml:Model'][0].packagedElement.filter(pe => pe['$'].name === 'modelSystemView')[0];
 
-        const classesMap: Map<string, Class> = modelSystemView.packagedElement
+        return modelSystemView.packagedElement
             .filter(pe => pe['$']['xmi:type'] === 'uml:Class')
             .map(pe => {
                 let c: Class = <Class> this.buildBase(pe);
@@ -107,7 +134,7 @@ export class SystemViewParser {
                         c.targetPortId = ends[1]['role'];
                         c.targetComponentId = ends[1]['partWithPort'];
 
-                        connectorsArray.push(c);
+                        //connectorsArray.push(c);
                         return c;
                     });
 
@@ -127,10 +154,12 @@ export class SystemViewParser {
                                 });
 
                             r.transition?.
-                                filter(sv => sv['$']['xmi:type'] === 'uml:Transition')
-                                .map(sv => {
-                                    const s: Transition = <Transition> this.buildBase(sv);
-                                    b.transitions.push(s);
+                                filter(tr => tr['$']['xmi:type'] === 'uml:Transition')
+                                .map(tr => {
+                                    const t: Transition = <Transition> this.buildBase(tr);
+                                    t.sourceId = tr['$']['source'];
+                                    t.targetId = tr['$']['target'];
+                                    b.transitions.push(t);
                                 });
                         });
                         return b;
@@ -140,6 +169,11 @@ export class SystemViewParser {
                 acc.set(c.id, c);
                 return acc;
             }, new Map<string, Class>());
+    }
+
+    static identifyComponents(classesMap: Map<string, Class>){
+
+        let componentsMap: Map<string, Component> = new Map<string, Component>();
 
         classesMap.forEach((c, classId) => {
 
@@ -155,8 +189,7 @@ export class SystemViewParser {
                         ...port,
                         ownerComponentId: classId,
                         ownerComponentName: c.name
-                    })),
-                    errorStates: this.findErrorStates(errorStates, c)
+                    }))
                 };
 
                 c.properties.forEach(p => {
@@ -171,8 +204,7 @@ export class SystemViewParser {
                             ...port,
                             ownerComponentId: p.id,
                             ownerComponentName: p.name
-                        })),
-                        errorStates: this.findErrorStates(errorStates, clazz)
+                        }))
                     };
                     componentsMap.set(c2.id, c2);
                 });
@@ -181,25 +213,72 @@ export class SystemViewParser {
 
         });
 
+        return componentsMap;
+    }
+
+    static identifyThreatsPropagation(classesMap: Map<string, Class>, 
+        componentsMap: Map<string, Component>, 
+        internalFaults: InternalFault[], 
+        attacks: Attack[], 
+        errorStates: ErrorState[]) {
+
+        const errorStatesIds = errorStates.map(es => es.baseStateId);
+
+        componentsMap.forEach(c => {
+            const clazz = classesMap.get(c.classDefinitionId);
+
+            clazz.behaviors?.forEach(b => {
+
+                let internalFault;
+                b.transitions?.find(t => {
+                    internalFault = internalFaults.find(itf => itf.baseTransitionId === t.id);
+                });
+
+                let attack;
+                b.transitions?.find(t => {
+                    attack = attacks.find(at => at.baseTransitionId === t.id);
+                });
+
+                c.errorStates = b.states?.filter(s => errorStatesIds.includes(s.id))
+                    .map(s => {
+                        return {
+                            ...s,
+                            baseStateId: s.id,
+                            probability: errorStates.find(es => es.baseStateId === s.id)?.probability,
+                            internalFault,
+                            attack
+                        }
+                    });
+            });
+        });
+
+    }
+
+    static identifyPorts(componentsMap: Map<string, Component>){
+        let portsMap: Map<string, Port> = new Map<string, Port>();
+
         componentsMap.forEach(c => {
             c.ports.forEach(port => {
                 portsMap.set(`${port.id}:${c.id}`, port);
             });
         });
+
+        return portsMap;
+    }
+
+    static identifyConnectors(classesMap: Map<string, Class>){
+        const connectorsArray: Connector[] = [];
+        classesMap.forEach(c => {
+            if(!!c?.connectors){
+                connectorsArray.push(...c?.connectors);
+            }
+        });
+        return connectorsArray;
     }
 
     static findErrorStates(errorStates: ErrorState[], c: Class){
         // see if any c.behavior.states has its id in errorStates.baseStateId
-        const errorStatesIds = errorStates.map(es => es.baseStateId);
-        const states = c.behaviors?.map(b => b.states).flat();
-        return states?.filter(s => errorStatesIds.includes(s.id))
-            .map(s => {
-                return {
-                    ...s,
-                    baseStateId: s.id,
-                    probability: errorStates.find(es => es.baseStateId === s.id)?.probability
-                }
-            });
+        
     }
 
     static sanitizeComponents(componentsMap: Map<string, Component>, connectorsArray: Array<Connector>){
