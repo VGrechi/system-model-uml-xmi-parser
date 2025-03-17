@@ -1,29 +1,38 @@
 
-import { ErrorPath } from "../domain/propagation/error-path";
-import { Path } from "../domain/propagation/path";
+import { ErrorPathNode } from "../domain/propagation/error-path";
+import { PathNode } from "../domain/propagation/path-node";
+import { EventTypeEnum } from "../domain/shared/event-type-enum";
 import { LinkedList, ListNode } from "../utils/linked-list";
 
 export class ErrorPathIdentifier {
 
-    static identifyErrorPaths(systemView: SystemView, paths: LinkedList<Path>[]): LinkedList<Path>[] {
+    static identifyErrorPaths(systemView: SystemView, paths: LinkedList<PathNode>[]): LinkedList<PathNode>[] {
         const { componentsMap } = systemView;
 
-        let errorPaths: LinkedList<Path>[] = [];
+        let errorPaths: LinkedList<PathNode>[] = [];
         paths.forEach(path => {
             let currentNode = path.head;
             let remainingNodesCount = path.size;
 
             while (currentNode) {
                 const currentComponent = componentsMap.get(currentNode.value.componentId);
-                if(currentComponent.errorStates?.length > 0) {
-                    // TODO
-                    // Identify if ErrorState is attack or fault
-                    // If it is fault and currentNode is an input port, jump to the next node
-                    // If it is attack and currentNode is an output port, THE CODE IS BROKEN
-                    let newErrorPath = ErrorPathIdentifier.parseToErrorPath(currentNode, remainingNodesCount);
-                    errorPaths.push(newErrorPath);
-                    break;
-                }
+
+                currentComponent.errorStates?.forEach(errorState => {
+                    const portDirection = currentNode.value.portDirection;
+                    if(errorState.attack){
+                        if(portDirection === 'in' || portDirection === 'inout') {
+                            let newErrorPath = ErrorPathIdentifier.parseToErrorPath(currentNode, EventTypeEnum.ATTACK, errorState.name, remainingNodesCount);
+                            errorPaths.push(newErrorPath);
+                        }
+                    }
+
+                    if(errorState.internalFault){
+                        if(portDirection === 'out' || portDirection === 'inout') {
+                            let newErrorPath = ErrorPathIdentifier.parseToErrorPath(currentNode, EventTypeEnum.FAULT, errorState.name, remainingNodesCount);
+                            errorPaths.push(newErrorPath);
+                        }
+                    }
+                });
                 
                 currentNode = currentNode.next;
                 remainingNodesCount--;
@@ -32,10 +41,10 @@ export class ErrorPathIdentifier {
         return errorPaths;
     }
 
-    private static parseToErrorPath(currentNode: ListNode<Path>, remainingNodes: number) {
-        let newErrorPath = new LinkedList<ErrorPath>();
-        let newHead = new ListNode<ErrorPath>(
-            new ErrorPath(currentNode.value, 'fault', 'Detected Error') // Example origin type and event name
+    private static parseToErrorPath(currentNode: ListNode<PathNode>, originType: EventTypeEnum, originEventName: string, remainingNodes: number) {
+        let newErrorPath = new LinkedList<ErrorPathNode>();
+        let newHead = new ListNode<ErrorPathNode>(
+            new ErrorPathNode(currentNode.value, originType, originEventName) // Example origin type and event name
         );
         newErrorPath.head = newHead;
         newErrorPath.size = remainingNodes;
@@ -44,8 +53,8 @@ export class ErrorPathIdentifier {
         let prevNode = newHead;
         let tempNode = currentNode.next;
         while (tempNode) {
-            let newNode = new ListNode<ErrorPath>(
-                new ErrorPath(tempNode.value, null, null)
+            let newNode = new ListNode<ErrorPathNode>(
+                new ErrorPathNode(tempNode.value, null, null)
             );
             prevNode.next = newNode;
             prevNode = newNode;

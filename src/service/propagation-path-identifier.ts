@@ -1,12 +1,12 @@
 import { LinkedList } from '../utils/linked-list';
-import { Path } from '../domain/propagation/path';
+import { PathNode } from '../domain/propagation/path-node';
 
 export class PropagationPathIdentifier {
 
     static systemView: SystemView;
-    static paths: LinkedList<Path>[];
+    static paths: LinkedList<PathNode>[];
 
-    static identifyPropagationPath(systemView: SystemView): LinkedList<Path>[] {
+    static identifyPropagationPath(systemView: SystemView): LinkedList<PathNode>[] {
 
         this.systemView = systemView;
         this.paths = [];
@@ -18,13 +18,13 @@ export class PropagationPathIdentifier {
             .filter(port => !connectorsArray.find(connector => connector.targetPortId === port.id));
 
         inPorts.forEach(inPort => {
-            this.explorePort(inPort, new LinkedList<Path>());
+            this.explorePort(inPort, new LinkedList<PathNode>());
         });
 
         return this.paths;
     }
 
-    static storePath = (path: LinkedList<Path>) => {
+    static storePath = (path: LinkedList<PathNode>) => {
         if(path.getSize() <= 1) return;
         this.paths.push(path);
     }
@@ -35,7 +35,7 @@ export class PropagationPathIdentifier {
 
     static printNode = (port: Port) => {
         const component = this.findComponent(port);
-        return new Path(port.id, port.name, port.direction, component.id, component.name);
+        return new PathNode(port.id, port.name, port.direction, component.id, component.name);
     }
 
     static findComponent = (port: Port) => {
@@ -57,7 +57,7 @@ export class PropagationPathIdentifier {
         return portsMap.get(`${portId}:${componentId}`);
     }
 
-    static explorePort = (port: Port, currentPath: LinkedList<Path>) => {
+    static explorePort = (port: Port, currentPath: LinkedList<PathNode>) => {
         const { connectorsArray } = this.systemView;
 
         currentPath.append(this.printNode(port));
@@ -82,7 +82,7 @@ export class PropagationPathIdentifier {
         }
     }
 
-    static exploreConnectors = (port: Port, currentPath: LinkedList<Path>) => {
+    static exploreConnectors = (port: Port, currentPath: LinkedList<PathNode>) => {
         const { connectorsArray, componentsMap } = this.systemView;
         const sourceComponent = componentsMap.get(port.ownerComponentId);
 

@@ -1,4 +1,4 @@
-export class Path {
+export class PathNode {
     portId: string;
     portName: string;
     portDirection: "in" | "out" | "inout";

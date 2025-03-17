@@ -1,12 +1,13 @@
-import { Path } from "./path";
+import { EventTypeEnum } from "../shared/event-type-enum";
+import { PathNode } from "./path-node";
 
-export class ErrorPath extends Path {
-    originType: 'attack' | 'fault';
-    originEventName: string;
+export class ErrorPathNode extends PathNode {
+    eventType: EventTypeEnum;
+    eventName: string;
 
-    constructor(path: Path, originType: 'attack' | 'fault', originEventName: string) {
+    constructor(path: PathNode, eventType: EventTypeEnum, eventName: string) {
         super(path.portId, path.portName, path.portDirection, path.componentId, path.componentName);
-        this.originType = originType;
-        this.originEventName = originEventName;
+        this.eventType = eventType;
+        this.eventName = eventName;
     }
 }
