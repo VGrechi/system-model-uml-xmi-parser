@@ -1,5 +1,9 @@
-interface BaseEvent {
+import { EventTypeEnum } from "../shared/event-type-enum";
+
+export interface BaseEvent {
     id: string;
     name: string;
-    description?: string;
+    type: EventTypeEnum;
+    componentName: string;
+    
 }

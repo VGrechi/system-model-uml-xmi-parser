@@ -4,6 +4,7 @@ import { PropagationPathIdentifier } from './service/propagation-path-identifier
 import { AFTPrinter } from './service/aft-printer';
 import { ErrorPathIdentifier } from './service/error-path-identifier';
 import { writeToFile } from './utils/txt-utils';
+import { AFTGenerator } from './service/aft-generator';
 
 (async () => {
     const result = await readXML('assets/Automotive HAD Vehicle.uml');
@@ -14,40 +15,11 @@ import { writeToFile } from './utils/txt-utils';
 
     const errorsPaths = ErrorPathIdentifier.identifyErrorPaths(systemView, paths);
 
-    writeToFile("out/output.txt", errorsPaths.map(path => path.toString()));
+    //writeToFile("out/output.txt", errorsPaths.map(path => path.toString()));
     
-    //TODO - Build Attack-Fault Tree
+    const afts = AFTGenerator.generate(errorsPaths);
 
-    // AFT Example
-    const attack1: AttackEvent = {
-        id: "A1",
-        name: "DoS Attack on Camera",
-        description: "Overloads video stream, causing failure",
-        threatCategory: "Denial of Service",
-        attackType: "UDP Flooding",
-        targetPortId: "123"
-    };
-    
-    const fault1: FaultEvent = {
-        id: "F1",
-        name: "Camera Processor Failure",
-        componentId: "CAM01",
-        faultType: "Crash"
-    };
-    
-    const andGate: LogicGate = {
-        id: "G1",
-        type: "AND",
-        inputs: [attack1, fault1]
-    };
-    
-    const topEvent: TopEvent = {
-        id: "T1",
-        name: "System Video Failure",
-        description: "The video transmission system stops working due to attack or failure.",
-        root: andGate
-    };
-    
-    console.log("=== Attack-Fault Tree ===");
-    AFTPrinter.printTopEvent(topEvent);
+    afts.forEach(aft => {
+        AFTPrinter.printTopEvent(aft);
+    });
 })()

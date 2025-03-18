@@ -1,4 +1,5 @@
 export enum EventTypeEnum {
     ATTACK = 'attack',
-    FAULT = 'fault'
+    FAULT = 'fault',
+    GATE = 'gate',
 }
