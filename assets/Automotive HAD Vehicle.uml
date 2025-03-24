@@ -39,10 +39,11 @@
         <ownedAttribute xmi:type="uml:Port" xmi:id="_SBfuQO9kEe6K1ccSakqCcQ" name="networkData" aggregation="composite"/>
         <ownedAttribute xmi:type="uml:Port" xmi:id="_UpSP4O9kEe6K1ccSakqCcQ" name="data" aggregation="composite"/>
         <ownedAttribute xmi:type="uml:Port" xmi:id="_c1A7MO9kEe6K1ccSakqCcQ" name="envData" aggregation="composite"/>
-        <ownedBehavior xmi:type="uml:StateMachine" xmi:id="_Ea98MN9sEe-7ge8I-wdyKA" name="StateMachine1">
+        <ownedBehavior xmi:type="uml:StateMachine" xmi:id="_Ea98MN9sEe-7ge8I-wdyKA" name="CommunicationUnit SM">
           <region xmi:type="uml:Region" xmi:id="_F7Cn0N9sEe-7ge8I-wdyKA" name="Region1">
             <transition xmi:type="uml:Transition" xmi:id="_WWlXwN9tEe-UHcp1Nf2Cog" source="_46ma4N9sEe-UHcp1Nf2Cog" target="_Ql5LgN9tEe-UHcp1Nf2Cog"/>
             <transition xmi:type="uml:Transition" xmi:id="_t7nIUN9tEe-UHcp1Nf2Cog" source="_Ql5LgN9tEe-UHcp1Nf2Cog" target="_7T-3oN9tEe-UHcp1Nf2Cog"/>
+            <transition xmi:type="uml:Transition" xmi:id="_SQfpwAZJEfCCv-Wd61z8sA" source="_7T-3oN9tEe-UHcp1Nf2Cog" target="_7T-3oN9tEe-UHcp1Nf2Cog"/>
             <subvertex xmi:type="uml:Pseudostate" xmi:id="_46ma4N9sEe-UHcp1Nf2Cog" name="healthy"/>
             <subvertex xmi:type="uml:State" xmi:id="_Ql5LgN9tEe-UHcp1Nf2Cog" name="Unautorized Access to Network"/>
             <subvertex xmi:type="uml:State" xmi:id="_7T-3oN9tEe-UHcp1Nf2Cog" name="VC Software Spoofed"/>
@@ -56,9 +57,10 @@
       <packagedElement xmi:type="uml:Class" xmi:id="_p90kgO9kEe6K1ccSakqCcQ" name="Camera" classifierBehavior="_8oD2AN9qEe-7ge8I-wdyKA">
         <ownedAttribute xmi:type="uml:Port" xmi:id="_sp6-YO9kEe6K1ccSakqCcQ" name="lensSensor" aggregation="composite"/>
         <ownedAttribute xmi:type="uml:Port" xmi:id="_weQLoO9kEe6K1ccSakqCcQ" name="video" aggregation="composite"/>
-        <ownedBehavior xmi:type="uml:StateMachine" xmi:id="_8oD2AN9qEe-7ge8I-wdyKA" name="StateMachine1">
+        <ownedBehavior xmi:type="uml:StateMachine" xmi:id="_8oD2AN9qEe-7ge8I-wdyKA" name="Camera SM">
           <region xmi:type="uml:Region" xmi:id="_9TexkN9qEe-7ge8I-wdyKA" name="Region1">
             <transition xmi:type="uml:Transition" xmi:id="_fDvAAN9rEe-7ge8I-wdyKA" name="blurry image" source="_BUUJwN9rEe-7ge8I-wdyKA" target="_IwsbwN9rEe-7ge8I-wdyKA"/>
+            <transition xmi:type="uml:Transition" xmi:id="_MNU88Ag3EfCQV7ZAQqx4xQ" source="_IwsbwN9rEe-7ge8I-wdyKA" target="_IwsbwN9rEe-7ge8I-wdyKA"/>
             <subvertex xmi:type="uml:Pseudostate" xmi:id="_BUUJwN9rEe-7ge8I-wdyKA" name="healthy"/>
             <subvertex xmi:type="uml:State" xmi:id="_IwsbwN9rEe-7ge8I-wdyKA" name="Video stream incorrect value"/>
           </region>
@@ -964,29 +966,28 @@
   <PortAndFlows:FlowPort xmi:id="_N0yWEO-MEe6K1ccSakqCcQ" base_Port="_N0xvAO-MEe6K1ccSakqCcQ" direction="in"/>
   <PortAndFlows:FlowPort xmi:id="_TDf2oO-MEe6K1ccSakqCcQ" base_Port="_TDfPkO-MEe6K1ccSakqCcQ" direction="in"/>
   <PortAndFlows:FlowPort xmi:id="_5l5lcO-MEe6K1ccSakqCcQ" base_Port="_5l4-YO-MEe6K1ccSakqCcQ"/>
-  <FailurePropagation:FLABehavior xmi:id="_Mg7tAC_AEe-3MPrH8zP5hg" base_Class="_hjXgsO9kEe6K1ccSakqCcQ"/>
-  <FailurePropagation:FLABehavior xmi:id="_OgVY8C_AEe-3MPrH8zP5hg" base_Class="_CK_6MO9lEe6K1ccSakqCcQ"/>
-  <FailurePropagation:FLABehavior xmi:id="_TmTNMC_AEe-3MPrH8zP5hg" base_Class="_p90kgO9kEe6K1ccSakqCcQ"/>
-  <FailurePropagation:FLABehavior xmi:id="_UzPhcC_AEe-3MPrH8zP5hg" base_Class="_QT_qoO9kEe6K1ccSakqCcQ"/>
-  <FailurePropagation:FLABehavior xmi:id="_V7dGsC_AEe-3MPrH8zP5hg" base_Class="_58tfkO9jEe6K1ccSakqCcQ"/>
-  <FailurePropagation:FLABehavior xmi:id="_XAomEC_AEe-3MPrH8zP5hg" base_Class="_JxVO4O9kEe6K1ccSakqCcQ"/>
-  <FailurePropagation:FLABehavior xmi:id="_ZBKTYC_AEe-3MPrH8zP5hg" base_Class="_oWEZAO9jEe6K1ccSakqCcQ"/>
-  <FailurePropagation:FLABehavior xmi:id="_aRsuMC_AEe-3MPrH8zP5hg" base_Class="_sGxf8O9iEe6K1ccSakqCcQ"/>
-  <FailurePropagation:FLABehavior xmi:id="_cxkp8C_AEe-3MPrH8zP5hg" base_Class="_gomXAO9jEe6K1ccSakqCcQ"/>
   <FailurePropagation:FailurePropagationAnalysis xmi:id="_UUU7YC_BEe-3MPrH8zP5hg" base_StructuredClassifier="_ReOQ8C_BEe-3MPrH8zP5hg" base_NamedElement="_ReOQ8C_BEe-3MPrH8zP5hg"/>
   <DependableComponent:ErrorModelBehavior xmi:id="_imPS4N9qEe-7ge8I-wdyKA" base_Property="_vqcMQO9oEe6K1ccSakqCcQ"/>
   <ThreatsPropagation:ErrorModel xmi:id="_GhCGQN9rEe-7ge8I-wdyKA" base_StateMachine="_8oD2AN9qEe-7ge8I-wdyKA"/>
   <ThreatsPropagation:ErrorState xmi:id="_J-MwsN9rEe-7ge8I-wdyKA" base_State="_IwsbwN9rEe-7ge8I-wdyKA" probability="0.05"/>
-  <ThreatsPropagation:StuckAt xmi:id="_OuCj8N9rEe-7ge8I-wdyKA" property="_weQLoO9kEe6K1ccSakqCcQ" value="0" base_State="_IwsbwN9rEe-7ge8I-wdyKA"/>
   <ThreatsPropagation:InternalFault xmi:id="_gVxPoN9rEe-7ge8I-wdyKA" base_Transition="_fDvAAN9rEe-7ge8I-wdyKA"/>
   <DependableComponent:ErrorModelBehavior xmi:id="_CwQG0N9sEe-7ge8I-wdyKA" base_Property="_nHQqQO9oEe6K1ccSakqCcQ"/>
   <ThreatsPropagation:ErrorModel xmi:id="_4UvUwN9sEe-UHcp1Nf2Cog" base_StateMachine="_Ea98MN9sEe-7ge8I-wdyKA"/>
   <ThreatsPropagation:ThreatState xmi:id="_RmjXQN9tEe-UHcp1Nf2Cog" base_State="_Ql5LgN9tEe-UHcp1Nf2Cog"/>
-  <ThreatsPropagation:Attack xmi:id="_vz44kN9tEe-UHcp1Nf2Cog" base_Transition="_t7nIUN9tEe-UHcp1Nf2Cog" kind="dataSpoofingAttack" threat="unauthorizedModificationOfService"/>
   <ThreatsPropagation:Vulnerability xmi:id="_v0ptkN9tEe-UHcp1Nf2Cog" base_Transition="_t7nIUN9tEe-UHcp1Nf2Cog" kind="inadequateEncryptionStrength"/>
-  <ThreatsPropagation:Vulnerability xmi:id="_11U2kN9tEe-UHcp1Nf2Cog" base_Transition="_WWlXwN9tEe-UHcp1Nf2Cog"/>
   <ThreatsPropagation:ErrorState xmi:id="_8cLOwN9tEe-UHcp1Nf2Cog" base_State="_7T-3oN9tEe-UHcp1Nf2Cog"/>
   <ThreatsPropagation:Failure xmi:id="_aWrToN9uEe-UHcp1Nf2Cog">
     <mode>brakingForce.comission</mode>
   </ThreatsPropagation:Failure>
+  <ThreatsPropagation:Failure xmi:id="_TgkKgAZJEfCCv-Wd61z8sA" base_Transition="_SQfpwAZJEfCCv-Wd61z8sA">
+    <mode>data.valueCoarse</mode>
+  </ThreatsPropagation:Failure>
+  <ThreatsPropagation:Attack xmi:id="_1UYqUAZJEfCCv-Wd61z8sA" base_Transition="_WWlXwN9tEe-UHcp1Nf2Cog" externalFaults="" kind="dataSpoofingAttack" likelihood=""/>
+  <ThreatsPropagation:Failure xmi:id="_NgOIMAg3EfCQV7ZAQqx4xQ" base_Transition="_MNU88Ag3EfCQV7ZAQqx4xQ">
+    <mode>video.valueCoarse</mode>
+  </ThreatsPropagation:Failure>
+  <FailurePropagation:FLABehavior xmi:id="_ov17MAg3EfCQV7ZAQqx4xQ" fptc="updatePackage.comission > updatePackage.comission" base_Property="_ZnddQO9oEe6K1ccSakqCcQ"/>
+  <FailurePropagation:FLABehavior xmi:id="_70BWwAg3EfCQV7ZAQqx4xQ" fptc="frontCameraVideo.valueCoarse, updatePackage.comission > brakingForce.comission" base_Property="_ffk8oO9nEe6K1ccSakqCcQ"/>
+  <FailurePropagation:FLABehavior xmi:id="_NzsBUAg4EfCQV7ZAQqx4xQ" fptc="brakingForce.comission > longitudinalMoviment.omission" base_Property="_9vlXcO9nEe6K1ccSakqCcQ"/>
+  <FailurePropagation:FLABehavior xmi:id="_mTn68Ag4EfCQV7ZAQqx4xQ" fptc="networkData.comission > data.comission" base_Property="_nHQqQO9oEe6K1ccSakqCcQ"/>
 </xmi:XMI>

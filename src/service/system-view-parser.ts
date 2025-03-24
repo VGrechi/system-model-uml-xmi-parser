@@ -1,3 +1,5 @@
+import { FLABehaviour } from "../domain/system-design/fla-behaviour";
+
 export class SystemViewParser {
 
     static buildBase(pe: any): Base {
@@ -19,11 +21,15 @@ export class SystemViewParser {
 
         const errorStates = this.parseErrorStates(xmi);
 
+        const flaBehaviours = this.parseFLABehaviours(xmi);
+
         const classesMap = this.parseClasses(xmi, flowsAndPorts);
 
         let componentsMap = this.identifyComponents(classesMap);
 
         this.identifyThreatsPropagation(classesMap, componentsMap, internalFaults, attacks, errorStates);
+
+        this.identifyFPTCExpressions(componentsMap, flaBehaviours);
 
         let portsMap = this.identifyPorts(componentsMap);
 
@@ -88,6 +94,18 @@ export class SystemViewParser {
         });
 
         return errorStates;
+    }
+
+    static parseFLABehaviours(xmi){
+        const flaBehaviours: FLABehaviour[] = xmi['FailurePropagation:FLABehavior'].map(at => {
+            return {
+                id: at['$']['xmi:id'],
+                componentId: at['$']['base_Property'],
+                fptcExpression: at['$']['fptc']
+            }
+        });
+
+        return flaBehaviours;
     }
 
     static parseClasses(xmi, flowsAndPorts: FlowPort[]){
@@ -252,6 +270,14 @@ export class SystemViewParser {
             });
         });
 
+    }
+
+    static identifyFPTCExpressions( componentsMap: Map<string, Component>, flaBehaviours: FLABehaviour[]){
+        flaBehaviours.forEach(fla => {
+            const component = componentsMap.get(fla.componentId);
+            component.fptcExpression = fla.fptcExpression;
+            componentsMap.set(component.id, component);
+        });
     }
 
     static identifyPorts(componentsMap: Map<string, Component>){
