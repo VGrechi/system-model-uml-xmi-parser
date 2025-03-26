@@ -1,4 +1,6 @@
-interface Connector extends Base {
+import { Base } from "./base";
+
+export interface Connector extends Base {
     sourcePortId: string;
     sourceComponentId: string;
     targetPortId: string;

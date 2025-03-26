@@ -1,4 +1,4 @@
-interface Base {
+export interface Base {
     id: string;
     name: string;
     umlType: string;

@@ -1,3 +1,5 @@
-interface Property extends Base {
+import { Base } from "./base";
+
+export interface Property extends Base {
     classDefinitionId: string;
 }
