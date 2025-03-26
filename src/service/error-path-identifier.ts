@@ -2,6 +2,7 @@
 import { ErrorPathNode } from "../domain/propagation/error-path";
 import { PathNode } from "../domain/propagation/path-node";
 import { EventTypeEnum } from "../domain/shared/event-type-enum";
+import { SystemView } from "../dto/system-view";
 import { LinkedList, ListNode } from "../utils/linked-list";
 
 export class ErrorPathIdentifier {
@@ -19,6 +20,7 @@ export class ErrorPathIdentifier {
 
                 currentComponent.errorStates?.forEach(errorState => {
                     const portDirection = currentNode.value.portDirection;
+                    /*
                     if (errorState.attack) {
                         if (portDirection === 'in' || portDirection === 'inout') {
                             let newErrorPath = ErrorPathIdentifier.parseToErrorPath(currentNode, EventTypeEnum.ATTACK, errorState.name, remainingNodesCount);
@@ -32,6 +34,7 @@ export class ErrorPathIdentifier {
                             errorPaths.push(newErrorPath);
                         }
                     }
+                        */
                 });
 
                 currentNode = currentNode.next;

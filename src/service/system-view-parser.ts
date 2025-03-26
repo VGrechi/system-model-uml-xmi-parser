@@ -1,4 +1,9 @@
+import { EventTypeEnum } from "../domain/shared/event-type-enum";
+import { Class } from "../domain/system-design/class";
+import { Component } from "../domain/system-design/component";
 import { FLABehaviour } from "../domain/system-design/fla-behaviour";
+import { Port } from "../domain/system-design/port";
+import { SystemView } from "../dto/system-view";
 
 export class SystemViewParser {
 
@@ -15,19 +20,13 @@ export class SystemViewParser {
 
         const flowsAndPorts = this.parseFlowsAndPorts(xmi);
 
-        const internalFaults = this.parseInternalFault(xmi);
-
-        const attacks = this.parseAttacks(xmi);
-
-        const errorStates = this.parseErrorStates(xmi);
-
         const flaBehaviours = this.parseFLABehaviours(xmi);
 
         const classesMap = this.parseClasses(xmi, flowsAndPorts);
 
         let componentsMap = this.identifyComponents(classesMap);
 
-        this.identifyThreatsPropagation(classesMap, componentsMap, internalFaults, attacks, errorStates);
+        this.analizeStateMachines(xmi, classesMap, componentsMap);
 
         this.identifyFPTCExpressions(componentsMap, flaBehaviours);
 
@@ -82,6 +81,41 @@ export class SystemViewParser {
         });
 
         return attacks;
+    }
+
+    static parseVulnerabilities(xmi){
+        const vulnerabilities: Vulnerability[] = xmi['ThreatsPropagation:Vulnerability'].map(at => {
+            return {
+                id: at['$']['xmi:id'],
+                baseTransitionId: at['$']['base_Transition'],
+                kind: at['$']['kind']
+            }
+        });
+
+        return vulnerabilities;
+    }
+
+    static parseThreatStates(xmi){
+        const threatStates: ThreatState[] = xmi['ThreatsPropagation:ThreatState'].map(es => {
+            return {
+                id: es['$']['xmi:id'],
+                baseStateId: es['$']['base_State']
+            }
+        });
+
+        return threatStates;
+    }
+
+    static parseFailures(xmi){
+        const failures: Failure[] = xmi['ThreatsPropagation:Failure'].map(at => {
+            return {
+                id: at['$']['xmi:id'],
+                baseTransitionId: at['$']['base_Transition'],
+                mode: at['mode'][0]
+            }
+        });
+
+        return failures;
     }
 
     static parseErrorStates(xmi){
@@ -234,39 +268,46 @@ export class SystemViewParser {
         return componentsMap;
     }
 
-    static identifyThreatsPropagation(classesMap: Map<string, Class>, 
-        componentsMap: Map<string, Component>, 
-        internalFaults: InternalFault[], 
-        attacks: Attack[], 
-        errorStates: ErrorState[]) {
+    static analizeStateMachines(xmi: any, classesMap: Map<string, Class>, componentsMap: Map<string, Component>) {
 
-        const errorStatesIds = errorStates.map(es => es.baseStateId);
+        const internalFaults = this.parseInternalFault(xmi);
+        const attacks = this.parseAttacks(xmi);
+        const vulnerabilities = this.parseVulnerabilities(xmi);
+        const threatStates = this.parseThreatStates(xmi);
+        const failures = this.parseFailures(xmi);
+        const errorStates = this.parseErrorStates(xmi);
+
+        
 
         componentsMap.forEach(c => {
             const clazz = classesMap.get(c.classDefinitionId);
 
             clazz.behaviors?.forEach(b => {
+                const errorState = b.states?.find(s => errorStates.find(es => es.baseStateId === s.id))
+                
+                const errorStateSourceTransitions = b.transitions?.filter(t => t.targetId === errorState.id);
 
-                let internalFault;
-                b.transitions?.find(t => {
-                    internalFault = internalFaults.find(itf => itf.baseTransitionId === t.id);
-                });
+                const failure = failures.find(f => errorStateSourceTransitions.find(t => t.id === f.baseTransitionId));
+                const failureMode = failure['mode'];
 
-                let attack;
-                b.transitions?.find(t => {
-                    attack = attacks.find(at => at.baseTransitionId === t.id);
-                });
+                let failureModeCause = null;
+                const internalFault = internalFaults.find(itf => errorStateSourceTransitions.find(t => t.id === itf.baseTransitionId));
+                if(internalFault){
+                    failureModeCause = EventTypeEnum.FAULT;
+                }
 
-                c.errorStates = b.states?.filter(s => errorStatesIds.includes(s.id))
-                    .map(s => {
-                        return {
-                            ...s,
-                            baseStateId: s.id,
-                            probability: errorStates.find(es => es.baseStateId === s.id)?.probability,
-                            internalFault,
-                            attack
-                        }
-                    });
+                const vulnerabilityTransition = errorStateSourceTransitions.find(st => vulnerabilities.find(v => v.baseTransitionId === st.id));
+                if(vulnerabilityTransition){
+                    const threatState = threatStates.find(ts => ts.baseStateId === vulnerabilityTransition.sourceId);
+                    const threatStateSourceTransitions = b.transitions?.filter(t => t.targetId === threatState.baseStateId);
+                    const attack = attacks.find(a => threatStateSourceTransitions.find(t => t.id === a.baseTransitionId));
+                    if(attack){
+                        failureModeCause = EventTypeEnum.ATTACK;
+                    }
+                }
+
+                // Find port
+                console.log(failureMode, failureModeCause)
             });
         });
 
