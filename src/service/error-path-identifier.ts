@@ -18,24 +18,17 @@ export class ErrorPathIdentifier {
             while (currentNode) {
                 const currentComponent = componentsMap.get(currentNode.value.componentId);
 
-                currentComponent.errorStates?.forEach(errorState => {
-                    const portDirection = currentNode.value.portDirection;
-                    /*
-                    if (errorState.attack) {
-                        if (portDirection === 'in' || portDirection === 'inout') {
-                            let newErrorPath = ErrorPathIdentifier.parseToErrorPath(currentNode, EventTypeEnum.ATTACK, errorState.name, remainingNodesCount);
-                            errorPaths.push(newErrorPath);
-                        }
-                    }
+                const currentPort = currentComponent.ports.find(port => port.id === currentNode.value.portId);
 
-                    if (errorState.internalFault) {
-                        if (portDirection === 'out' || portDirection === 'inout') {
-                            let newErrorPath = ErrorPathIdentifier.parseToErrorPath(currentNode, EventTypeEnum.FAULT, errorState.name, remainingNodesCount);
-                            errorPaths.push(newErrorPath);
-                        }
-                    }
-                        */
-                });
+                if(currentPort.failureMode && currentPort.failureModeCause) {
+                    let newErrorPath = ErrorPathIdentifier.parseToErrorPath(
+                        currentNode, 
+                        currentPort.failureModeCause, 
+                        `${currentPort.name}.${currentPort.failureMode}`, 
+                        remainingNodesCount
+                    );
+                    errorPaths.push(newErrorPath);
+                }
 
                 currentNode = currentNode.next;
                 remainingNodesCount--;

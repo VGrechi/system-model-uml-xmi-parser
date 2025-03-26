@@ -1,3 +1,5 @@
-interface ThreatState extends Base {
+import { Base } from "./base";
+
+export interface ThreatState extends Base {
     baseStateId: string;
 }

@@ -15,7 +15,7 @@ import { AFTGenerator } from './service/aft-generator';
 
     const errorsPaths = ErrorPathIdentifier.identifyErrorPaths(systemView, paths);
 
-    //writeToFile("out/output.txt", errorsPaths.map(path => path.toString()));
+    writeToFile("out/output.txt", errorsPaths.map(path => path.toString()));
     
     const afts = AFTGenerator.generate(errorsPaths);
 

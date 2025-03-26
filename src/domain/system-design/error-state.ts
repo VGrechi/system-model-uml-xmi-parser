@@ -1,4 +1,6 @@
-interface ErrorState extends Base {
+import { Base } from "./base";
+
+export interface ErrorState extends Base {
     baseStateId: string;
     probability: number;
 }

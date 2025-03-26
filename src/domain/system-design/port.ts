@@ -1,4 +1,6 @@
 import { EventTypeEnum } from "../shared/event-type-enum";
+import { FaultTypeEnum } from "../shared/fault-type-enum";
+import { Base } from "./base";
 
 export interface Port extends Base {
     ownerClassId: string;
@@ -6,6 +8,6 @@ export interface Port extends Base {
     ownerComponentId: string;
     ownerComponentName: string;
     direction: "in" | "out" | "inout";
-    failureMode?: "comission" | "omission" | "valueCoarse";
+    failureMode?: FaultTypeEnum;
     failureModeCause?: EventTypeEnum.ATTACK | EventTypeEnum.FAULT;
 }

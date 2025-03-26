@@ -1,8 +1,6 @@
 import { EventTypeEnum } from "../domain/shared/event-type-enum";
-import { Class } from "../domain/system-design/class";
-import { Component } from "../domain/system-design/component";
-import { FLABehaviour } from "../domain/system-design/fla-behaviour";
-import { Port } from "../domain/system-design/port";
+import { getFaultTypeEnum } from "../domain/shared/fault-type-enum";
+import { Attack, Base, Behavior, Class, Component, Connector, ErrorState, Failure, FLABehaviour, FlowPort, InternalFault, Port, Property, State, ThreatState, Transition, Vulnerability } from "../domain/system-design";
 import { SystemView } from "../dto/system-view";
 
 export class SystemViewParser {
@@ -20,15 +18,13 @@ export class SystemViewParser {
 
         const flowsAndPorts = this.parseFlowsAndPorts(xmi);
 
-        const flaBehaviours = this.parseFLABehaviours(xmi);
-
         const classesMap = this.parseClasses(xmi, flowsAndPorts);
 
         let componentsMap = this.identifyComponents(classesMap);
 
         this.analizeStateMachines(xmi, classesMap, componentsMap);
 
-        this.identifyFPTCExpressions(componentsMap, flaBehaviours);
+        this.identifyFPTCExpressions(xmi, componentsMap);
 
         let portsMap = this.identifyPorts(componentsMap);
 
@@ -277,8 +273,6 @@ export class SystemViewParser {
         const failures = this.parseFailures(xmi);
         const errorStates = this.parseErrorStates(xmi);
 
-        
-
         componentsMap.forEach(c => {
             const clazz = classesMap.get(c.classDefinitionId);
 
@@ -306,14 +300,22 @@ export class SystemViewParser {
                     }
                 }
 
-                // Find port
-                console.log(failureMode, failureModeCause)
+                
+                const portName = failureMode.split('.')[0];
+                const mode = failureMode.split('.')[1];
+
+                // Find port 
+                let port = c.ports.find(p => p.name === portName);
+                port.failureMode = getFaultTypeEnum(mode);
+                port.failureModeCause = failureModeCause;
             });
         });
 
     }
 
-    static identifyFPTCExpressions( componentsMap: Map<string, Component>, flaBehaviours: FLABehaviour[]){
+    static identifyFPTCExpressions(xmi: any, componentsMap: Map<string, Component>){
+        const flaBehaviours = this.parseFLABehaviours(xmi);
+
         flaBehaviours.forEach(fla => {
             const component = componentsMap.get(fla.componentId);
             component.fptcExpression = fla.fptcExpression;
@@ -341,11 +343,6 @@ export class SystemViewParser {
             }
         });
         return connectorsArray;
-    }
-
-    static findErrorStates(errorStates: ErrorState[], c: Class){
-        // see if any c.behavior.states has its id in errorStates.baseStateId
-        
     }
 
     static sanitizeComponents(componentsMap: Map<string, Component>, connectorsArray: Array<Connector>){
