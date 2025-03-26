@@ -1,5 +1,8 @@
 import { LinkedList } from '../utils/linked-list';
 import { PathNode } from '../domain/propagation/path-node';
+import { SystemView } from '../dto/system-view';
+import { Port } from '../domain/system-design/port';
+import { Component } from '../domain/system-design/component';
 
 export class PropagationPathIdentifier {
 
