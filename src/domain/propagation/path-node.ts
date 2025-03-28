@@ -13,7 +13,11 @@ export class PathNode {
         this.componentName = componentName;
     }
 
-    toString(): string {
-        return `${this.portName} ${this.portDirection.toUpperCase()} (${this.portId.substring(0,4)}) [${this.componentName} (${this.componentId.substring(0,4)})]`;
+    toString(hideIds: boolean = true): string {
+        if(hideIds) {
+            return `${this.portName} ${this.portDirection.toUpperCase()} [${this.componentName}]`;
+        } else {
+            return `${this.portName} ${this.portDirection.toUpperCase()} (${this.portId.substring(0,4)}) [${this.componentName} (${this.componentId.substring(0,4)})]`;
+        }
     }
 }

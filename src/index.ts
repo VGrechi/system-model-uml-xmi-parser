@@ -7,6 +7,7 @@ import { writeToFile } from './utils/txt-utils';
 import { AFTGenerator } from './service/aft-generator';
 
 (async () => {
+    console.time("Execution time");
     const result = await readXML('assets/Automotive HAD Vehicle.uml');
 
     const systemView = SystemViewParser.parse(result);
@@ -22,4 +23,5 @@ import { AFTGenerator } from './service/aft-generator';
     afts.forEach(aft => {
         AFTPrinter.printTopEvent(aft);
     });
+    console.timeEnd("Execution time");
 })()

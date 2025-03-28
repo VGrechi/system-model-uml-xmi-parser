@@ -34,6 +34,8 @@
       </packagedElement>
       <packagedElement xmi:type="uml:Class" xmi:id="_JxVO4O9kEe6K1ccSakqCcQ" name="On-Board Tester">
         <ownedAttribute xmi:type="uml:Port" xmi:id="_LmZTEO9kEe6K1ccSakqCcQ" name="updatePackage" aggregation="composite"/>
+        <ownedAttribute xmi:type="uml:Port" xmi:id="_3V9uoAt6EfCiveWIhNpKSg" name="cuData" aggregation="composite"/>
+        <ownedAttribute xmi:type="uml:Port" xmi:id="_8LMYMAt6EfCiveWIhNpKSg" name="usbData" aggregation="composite"/>
       </packagedElement>
       <packagedElement xmi:type="uml:Class" xmi:id="_QT_qoO9kEe6K1ccSakqCcQ" name="CommunicationUnit" classifierBehavior="_Ea98MN9sEe-7ge8I-wdyKA">
         <ownedAttribute xmi:type="uml:Port" xmi:id="_SBfuQO9kEe6K1ccSakqCcQ" name="networkData" aggregation="composite"/>
@@ -182,11 +184,11 @@
         </ownedConnector>
         <ownedConnector xmi:type="uml:Connector" xmi:id="_1IzdIO-OEe6K1ccSakqCcQ" name="Connector23">
           <end xmi:type="uml:ConnectorEnd" xmi:id="_1I0EMO-OEe6K1ccSakqCcQ" partWithPort="_W-mFIO-KEe6K1ccSakqCcQ" role="_5l4-YO-MEe6K1ccSakqCcQ"/>
-          <end xmi:type="uml:ConnectorEnd" xmi:id="_1I0EMe-OEe6K1ccSakqCcQ" partWithPort="_ZnddQO9oEe6K1ccSakqCcQ" role="_LmZTEO9kEe6K1ccSakqCcQ"/>
+          <end xmi:type="uml:ConnectorEnd" xmi:id="_1I0EMe-OEe6K1ccSakqCcQ" partWithPort="_ZnddQO9oEe6K1ccSakqCcQ" role="_8LMYMAt6EfCiveWIhNpKSg"/>
         </ownedConnector>
         <ownedConnector xmi:type="uml:Connector" xmi:id="_5rsZgO-OEe6K1ccSakqCcQ" name="Connector24">
           <end xmi:type="uml:ConnectorEnd" xmi:id="_5rtAkO-OEe6K1ccSakqCcQ" partWithPort="_nHQqQO9oEe6K1ccSakqCcQ" role="_UpSP4O9kEe6K1ccSakqCcQ"/>
-          <end xmi:type="uml:ConnectorEnd" xmi:id="_5rtAke-OEe6K1ccSakqCcQ" partWithPort="_ZnddQO9oEe6K1ccSakqCcQ" role="_LmZTEO9kEe6K1ccSakqCcQ"/>
+          <end xmi:type="uml:ConnectorEnd" xmi:id="_5rtAke-OEe6K1ccSakqCcQ" partWithPort="_ZnddQO9oEe6K1ccSakqCcQ" role="_3V9uoAt6EfCiveWIhNpKSg"/>
         </ownedConnector>
         <ownedConnector xmi:type="uml:Connector" xmi:id="_9lShQO-OEe6K1ccSakqCcQ" name="Connector25">
           <end xmi:type="uml:ConnectorEnd" xmi:id="_9lTIUO-OEe6K1ccSakqCcQ" partWithPort="_ZnddQO9oEe6K1ccSakqCcQ" role="_LmZTEO9kEe6K1ccSakqCcQ"/>
@@ -928,7 +930,7 @@
   <PortAndFlows:FlowPort xmi:id="_xIwWoO9jEe6K1ccSakqCcQ" base_Port="_xIvvkO9jEe6K1ccSakqCcQ" direction="in"/>
   <Blocks:Block xmi:id="_58utsO9jEe6K1ccSakqCcQ" base_Class="_58tfkO9jEe6K1ccSakqCcQ"/>
   <Blocks:Block xmi:id="_JxWdAO9kEe6K1ccSakqCcQ" base_Class="_JxVO4O9kEe6K1ccSakqCcQ"/>
-  <PortAndFlows:FlowPort xmi:id="_LmZ6IO9kEe6K1ccSakqCcQ" base_Port="_LmZTEO9kEe6K1ccSakqCcQ"/>
+  <PortAndFlows:FlowPort xmi:id="_LmZ6IO9kEe6K1ccSakqCcQ" base_Port="_LmZTEO9kEe6K1ccSakqCcQ" direction="out"/>
   <Blocks:Block xmi:id="_QUARsO9kEe6K1ccSakqCcQ" base_Class="_QT_qoO9kEe6K1ccSakqCcQ"/>
   <PortAndFlows:FlowPort xmi:id="_SBg8YO9kEe6K1ccSakqCcQ" base_Port="_SBfuQO9kEe6K1ccSakqCcQ" direction="in"/>
   <PortAndFlows:FlowPort xmi:id="_UpS28O9kEe6K1ccSakqCcQ" base_Port="_UpSP4O9kEe6K1ccSakqCcQ" direction="out"/>
@@ -971,14 +973,10 @@
   <ThreatsPropagation:ErrorModel xmi:id="_GhCGQN9rEe-7ge8I-wdyKA" base_StateMachine="_8oD2AN9qEe-7ge8I-wdyKA"/>
   <ThreatsPropagation:ErrorState xmi:id="_J-MwsN9rEe-7ge8I-wdyKA" base_State="_IwsbwN9rEe-7ge8I-wdyKA" probability="0.05"/>
   <ThreatsPropagation:InternalFault xmi:id="_gVxPoN9rEe-7ge8I-wdyKA" base_Transition="_fDvAAN9rEe-7ge8I-wdyKA"/>
-  <DependableComponent:ErrorModelBehavior xmi:id="_CwQG0N9sEe-7ge8I-wdyKA" base_Property="_nHQqQO9oEe6K1ccSakqCcQ"/>
   <ThreatsPropagation:ErrorModel xmi:id="_4UvUwN9sEe-UHcp1Nf2Cog" base_StateMachine="_Ea98MN9sEe-7ge8I-wdyKA"/>
   <ThreatsPropagation:ThreatState xmi:id="_RmjXQN9tEe-UHcp1Nf2Cog" base_State="_Ql5LgN9tEe-UHcp1Nf2Cog"/>
   <ThreatsPropagation:Vulnerability xmi:id="_v0ptkN9tEe-UHcp1Nf2Cog" base_Transition="_t7nIUN9tEe-UHcp1Nf2Cog" kind="inadequateEncryptionStrength"/>
   <ThreatsPropagation:ErrorState xmi:id="_8cLOwN9tEe-UHcp1Nf2Cog" base_State="_7T-3oN9tEe-UHcp1Nf2Cog"/>
-  <ThreatsPropagation:Failure xmi:id="_aWrToN9uEe-UHcp1Nf2Cog">
-    <mode>brakingForce.comission</mode>
-  </ThreatsPropagation:Failure>
   <ThreatsPropagation:Failure xmi:id="_TgkKgAZJEfCCv-Wd61z8sA" base_Transition="_SQfpwAZJEfCCv-Wd61z8sA">
     <mode>data.valueCoarse</mode>
   </ThreatsPropagation:Failure>
@@ -986,8 +984,10 @@
   <ThreatsPropagation:Failure xmi:id="_NgOIMAg3EfCQV7ZAQqx4xQ" base_Transition="_MNU88Ag3EfCQV7ZAQqx4xQ">
     <mode>video.valueCoarse</mode>
   </ThreatsPropagation:Failure>
-  <FailurePropagation:FLABehavior xmi:id="_ov17MAg3EfCQV7ZAQqx4xQ" fptc="updatePackage.comission > updatePackage.comission" base_Property="_ZnddQO9oEe6K1ccSakqCcQ"/>
+  <FailurePropagation:FLABehavior xmi:id="_ov17MAg3EfCQV7ZAQqx4xQ" fptc="cuData.comission, usbData.comission > updatePackage.comission" base_Property="_ZnddQO9oEe6K1ccSakqCcQ"/>
   <FailurePropagation:FLABehavior xmi:id="_70BWwAg3EfCQV7ZAQqx4xQ" fptc="frontCameraVideo.valueCoarse, updatePackage.comission > brakingForce.comission" base_Property="_ffk8oO9nEe6K1ccSakqCcQ"/>
   <FailurePropagation:FLABehavior xmi:id="_NzsBUAg4EfCQV7ZAQqx4xQ" fptc="brakingForce.comission > longitudinalMoviment.omission" base_Property="_9vlXcO9nEe6K1ccSakqCcQ"/>
   <FailurePropagation:FLABehavior xmi:id="_mTn68Ag4EfCQV7ZAQqx4xQ" fptc="networkData.comission > data.comission" base_Property="_nHQqQO9oEe6K1ccSakqCcQ"/>
+  <PortAndFlows:FlowPort xmi:id="_3WD1QAt6EfCiveWIhNpKSg" base_Port="_3V9uoAt6EfCiveWIhNpKSg" direction="in"/>
+  <PortAndFlows:FlowPort xmi:id="_8LONYAt6EfCiveWIhNpKSg" base_Port="_8LMYMAt6EfCiveWIhNpKSg" direction="in"/>
 </xmi:XMI>

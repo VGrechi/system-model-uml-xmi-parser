@@ -22,5 +22,6 @@ export class AFTPrinter {
         console.log('\n');
         console.log(`🚨 [TOP EVENT] ${topEvent.id}`);
         this.printAFT(topEvent.root, 1);
+        console.log('\n');
     };
 }
